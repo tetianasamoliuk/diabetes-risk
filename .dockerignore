@@ -1,0 +1,12 @@
+*
+!pyproject.toml
+!uv.lock
+!.streamlit
+!src
+!app
+!data/processed
+!data/external
+!models
+**/__pycache__
+**/*.pyc
+data/processed/results.xlsx

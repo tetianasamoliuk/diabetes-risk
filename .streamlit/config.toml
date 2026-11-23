@@ -1,0 +1,11 @@
+[server]
+headless = true
+# Аналітична вибірка на 200 тис. рядків займає близько 10 МБ; більший файл лише вичерпає пам'ять
+maxUploadSize = 25
+maxCacheDataSize = "300mb"
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
