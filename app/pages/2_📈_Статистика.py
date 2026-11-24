@@ -80,7 +80,8 @@ chosen = st.selectbox(
     "Ознака для гістограми", cols, format_func=FEATURE_LABELS_UK.get, placeholder="Оберіть ознаку"
 )
 figure_block(
-    figures.hist_by_group(df, chosen, FEATURE_LABELS_UK[chosen]),
+    figures.hist_by_group,
+    (df, chosen, FEATURE_LABELS_UK[chosen]),
     num.figure(),
     f"Розподіл ознаки за групами: {FEATURE_LABELS_UK[chosen]}",
     "По горизонталі значення ознаки, по вертикалі щільність (де людей більше, там стовпчик "
@@ -91,7 +92,8 @@ figure_block(
 
 box_cols = available(df, BOX_FACTORS)
 figure_block(
-    figures.box_by_group(df, box_cols, [FEATURE_LABELS_UK[c] for c in box_cols]),
+    figures.box_by_group,
+    (df, box_cols, [FEATURE_LABELS_UK[c] for c in box_cols]),
     num.figure(),
     "Діаграми розмаху (boxplot) ключових ознак за групами",
     "Прямокутник охоплює середні 50% людей, лінія всередині — це медіана, «вусики» показують "
@@ -104,7 +106,8 @@ st.header("Кореляції між ознаками")
 corr = correlations(df, cols)
 for method, name in CORR_METHODS:
     figure_block(
-        figures.corr_heatmap(corr[method], f"Кореляційна матриця ({name})"),
+        figures.corr_heatmap,
+        (corr[method], f"Кореляційна матриця ({name})"),
         num.figure(),
         f"Матриця кореляцій {name}",
         "Колір і число в клітинці показують силу зв'язку двох ознак від −1 до 1: "
@@ -142,7 +145,8 @@ else:
         "порівнюють з офіційною статистикою.",
     )
     figure_block(
-        figures.prevalence_bars(prev),
+        figures.prevalence_bars,
+        (prev,),
         num.figure(),
         "Поширеність ЦД2: незважена та зважена оцінки",
         "Для кожної групи два стовпчики: сірий — це частка у вибірці, синій — це зважена оцінка "

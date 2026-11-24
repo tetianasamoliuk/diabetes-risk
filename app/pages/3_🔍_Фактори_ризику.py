@@ -121,9 +121,8 @@ def show_multivariable_table(multi: pd.DataFrame, n_total: int, num: Numbering) 
 def show_multivariable_forest(multi: pd.DataFrame, num: Numbering) -> None:
     """Форест-графік багатофакторних OR (без індикатора циклу)."""
     figure_block(
-        figures.forest_plot(
-            multi.drop(index="cycle_2017", errors="ignore"), "Багатофакторні OR з 95% ДІ"
-        ),
+        figures.forest_plot,
+        (multi.drop(index="cycle_2017", errors="ignore"), "Багатофакторні OR з 95% ДІ"),
         num.figure(),
         "Форест-графік (forest plot) багатофакторних відношень шансів",
         "Як і раніше: точка показує OR, лінії є 95% ДІ, пунктир позначає OR = 1, шкала "
@@ -235,7 +234,8 @@ table_block(
     "напряму не порівнюють.",
 )
 figure_block(
-    figures.forest_plot(uni, "Однофакторні OR з 95% ДІ"),
+    figures.forest_plot,
+    (uni, "Однофакторні OR з 95% ДІ"),
     num.figure(),
     "Форест-графік (forest plot) однофакторних відношень шансів",
     "Кожна точка показує OR, лінії навколо неї 95% довірчий інтервал. Пунктир позначає "

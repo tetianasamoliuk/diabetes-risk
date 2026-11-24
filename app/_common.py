@@ -9,8 +9,10 @@ import sys
 from collections.abc import Callable
 from functools import partial
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import streamlit as st
 from matplotlib.figure import Figure
@@ -27,6 +29,9 @@ from risk.errors import ModelNotTrainedError
 from risk.models.train import load_models, load_test_predictions
 from risk.report.results import prevalence_all
 from risk.viz.style import GROUP_LABELS, apply_style, fig_to_png
+
+if TYPE_CHECKING:
+    import shap
 
 SURVEY_COLS = ("wt_mec", "strata", "psu")
 NO_VARIATION_MSG = "У файлі немає ознак з різними значеннями для цієї таблиці"
@@ -218,21 +223,71 @@ def _explain(how_to_read: str, meaning: str) -> None:
         st.markdown(meaning)
 
 
-def figure_block(fig: Figure, number: str, caption: str, how_to_read: str, meaning: str) -> None:
-    """Рисунок, підпис, кнопка PNG і пояснення."""
-    st.pyplot(fig)
-    full = f"Рисунок {number}. {caption}"
-    st.caption(full)
-    png = fig_to_png(fig, 300)
+def _array_key(a: object) -> tuple:
+    """Масив повністю; об'єктний (тексти рисунка) — за значеннями, а не за адресами об'єктів."""
+    arr = np.asarray(a)
+    return arr.shape, arr.dtype.str, arr.tolist() if arr.dtype == object else arr.tobytes()
+
+
+def _explanation_key(expl: "shap.Explanation") -> tuple:
+    """Ключ пояснення SHAP: усе, що беруть рисунки SHAP (значення, базові, дані, назви ознак)."""
+    arrays = (expl.values, expl.base_values, expl.data)
+    return (*map(_array_key, arrays), list(expl.feature_names))
+
+
+def _pandas_key(obj: pd.DataFrame | pd.Series) -> tuple:
+    """Таблиця повністю: Streamlit від 50 000 рядків хешує лише вибірку з 10 000 рядків."""
+    frame = obj.to_frame() if isinstance(obj, pd.Series) else obj
+    dtypes = [(c, repr(t)) for c, t in frame.dtypes.items()]
+    return dtypes, pd.util.hash_pandas_object(frame).to_numpy().tobytes()
+
+
+# тип за повним ім'ям: shap важкий, і сторінки без SHAP його не імпортують
+@st.cache_data(
+    show_spinner="Обчислення…",
+    max_entries=128,
+    hash_funcs={
+        "shap._explanation.Explanation": _explanation_key,
+        pd.DataFrame: _pandas_key,
+        pd.Series: _pandas_key,
+    },
+)
+def _figure_pngs(
+    name: str, _build: Callable[..., Figure], args: tuple, kwargs: dict
+) -> tuple[bytes, bytes]:
+    """PNG рисунка для екрана (200 dpi) і для кнопки (300 dpi), спільні для всіх відвідувачів.
+
+    Ключ — name і весь вміст args і kwargs; сам будівник _build у ключ не входить.
+    """
+    fig = _build(*args, **kwargs)
+    pngs = fig_to_png(fig, 200), fig_to_png(fig, 300)
+    plt.close(fig)
+    return pngs
+
+
+def figure_block(
+    build: Callable[..., Figure],
+    args: tuple,
+    number: str,
+    caption: str,
+    how_to_read: str,
+    meaning: str,
+    **build_kwargs: object,
+) -> None:
+    """Рисунок build(*args, **build_kwargs) з кешу, підпис, кнопка PNG і пояснення."""
+    name = f"{build.__module__}.{build.__qualname__}"
+    screen, download = _figure_pngs(name, build, args, build_kwargs)
+    # як st.pyplot: PNG 200 dpi з bbox tight на ширину контейнера
+    st.image(screen, width="stretch", output_format="PNG")
+    st.caption(f"Рисунок {number}. {caption}")
     st.download_button(
         "Завантажити графік PNG (300 dpi)",
-        data=png,
+        data=download,
         file_name=f"рисунок_{number}.png",
         mime="image/png",
         key=f"dl_figure_{number}",
     )
     _explain(how_to_read, meaning)
-    plt.close(fig)
 
 
 def table_block(

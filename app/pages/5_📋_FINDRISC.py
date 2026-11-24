@@ -129,7 +129,8 @@ if is_user:
         "варіант (a): шість пунктів анкети без нього, максимум 20 балів."
     )
 figure_block(
-    figures.findrisc_distribution(score, y),
+    figures.findrisc_distribution,
+    (score, y),
     num.figure(),
     "Розподіл балів FINDRISC (варіант a) у групах без ЦД2 і з ЦД2",
     "По горизонталі — сума балів, по вертикалі — кількість людей. Окремі стовпчики для "
@@ -152,12 +153,14 @@ st.caption(
     "недосяжна."
 )
 figure_block(
-    figures.findrisc_categories(categories(score), y, max_score=MAX_SCORE_A),
+    figures.findrisc_categories,
+    (categories(score), y),
     num.figure(),
     "Частка людей з ЦД2 за категоріями FINDRISC (варіант a)",
     "Висота стовпчика — відсоток людей з діабетом у категорії, під стовпчиком кількість людей.",
     "Зростання стовпчиків зліва направо означає, що вища категорія справді відповідає "
     "вищому ризику.",
+    max_score=MAX_SCORE_A,
 )
 
 if is_user:

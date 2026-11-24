@@ -181,7 +181,8 @@ curves = {
     k: (*roc_points(preds["t2d"], preds[f"p_{k}"]), m["auc"]) for k, m in metrics["test"].items()
 }
 figure_block(
-    figures.roc_curves(curves),
+    figures.roc_curves,
+    (curves,),
     num.figure(),
     "ROC-криві трьох моделей на тестовій вибірці",
     "Крива показує, скільки хворих модель знаходить (вертикаль) ціною скількох помилкових "
@@ -192,7 +193,8 @@ figure_block(
 
 st.header("Калібрування")
 figure_block(
-    figures.calibration_curves(calibration_frames(metrics)),
+    figures.calibration_curves,
+    (calibration_frames(metrics),),
     num.figure(),
     "Калібрувальні криві на тестовій вибірці",
     f"Люди розбиті на {CALIBRATION_BINS} груп за прогнозованим ризиком. По горизонталі — "
@@ -211,7 +213,8 @@ tabs = st.tabs([names[k] for k in metrics["test"]])
 for tab, key in zip(tabs, metrics["test"], strict=True):
     with tab:
         figure_block(
-            figures.confusion_matrix_fig(*confusion_counts(metrics, key), names[key]),
+            figures.confusion_matrix_fig,
+            (*confusion_counts(metrics, key), names[key]),
             num.figure(),
             f"Матриця помилок: {names[key]}, тестова вибірка",
             "Рядки — реальність, стовпці — рішення моделі. На діагоналі правильні відповіді, "
@@ -248,7 +251,8 @@ st.header("Що впливає на прогноз (SHAP)")
 expl = shap_explanation()
 st.caption(f"Модель: {names['hgb']}, тестова вибірка (N = {fmt_int(len(expl.values))}).")
 figure_block(
-    figures.shap_beeswarm(expl),
+    figures.shap_beeswarm,
+    (expl,),
     num.figure(),
     "SHAP-графік (beeswarm): внесок ознак у прогноз Gradient Boosting",
     "Кожна точка — одна людина. Положення по горизонталі — наскільки ознака змінила "
@@ -257,7 +261,8 @@ figure_block(
     "Якщо червоні точки праворуч, високі значення ознаки підвищують ризик.",
 )
 figure_block(
-    figures.shap_bar(expl),
+    figures.shap_bar,
+    (expl,),
     num.figure(),
     SHAP_BAR_CAPTION,
     "Довжина стовпчика — середній абсолютний внесок ознаки у прогноз (у log-odds), "

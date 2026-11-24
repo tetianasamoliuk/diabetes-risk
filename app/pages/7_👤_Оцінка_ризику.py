@@ -192,7 +192,8 @@ def show_shap(models: dict, person: PersonInput, num: Numbering) -> None:
     expl = local_shap(get_explainer(models["hgb"]), row)
     prob = predict_all({"hgb": models["hgb"]}, person, medians=medians)["hgb"]
     figure_block(
-        figures.shap_waterfall(readable_explanation(expl)),
+        figures.shap_waterfall,
+        (readable_explanation(expl),),
         num.figure(),
         "Внесок ознак у прогноз моделі Gradient Boosting "
         f"(її ймовірність для введених даних — {prob * 100:.1f} %)",

@@ -90,7 +90,8 @@ def show_comparison_table(comparison: pd.DataFrame, num: Numbering) -> None:
 def show_comparison_figure(comparison: pd.DataFrame, num: Numbering) -> None:
     """Рисунок 6.1: точки поширеності з довірчими інтервалами там, де вони відомі."""
     figure_block(
-        figures.prevalence_dots(dots_data(comparison)),
+        figures.prevalence_dots,
+        (dots_data(comparison),),
         num.figure(),
         COMPARISON_CAPTION,
         "Кожна точка — одне джерело; у підписі вказано, що саме вимірюється, а під ним — метод "
