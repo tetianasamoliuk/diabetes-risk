@@ -18,3 +18,9 @@ def test_page_runs_and_lists_model_sheets() -> None:
         "Завантажити Excel з усіма результатами",
         "Завантажити всі графіки (ZIP)",
     ]
+
+
+def test_glossary_wraps_long_text() -> None:
+    at = AppTest.from_file(str(PAGE), default_timeout=180).run()
+    # глосарій — статична таблиця з перенесенням: пояснення видно повністю, без прокручування вбік
+    assert any(list(t.value.columns) == ["Термін", "Пояснення"] for t in at.table)

@@ -28,6 +28,20 @@ def test_data_page_has_title_and_template_button() -> None:
     assert any(b.key == "dl_template" for b in at.get("download_button"))
 
 
+def test_variables_table_wraps_long_text() -> None:
+    at = run(PAGES[1])
+    # 1.2 — статична таблиця з перенесенням: довгу назву ознаки не обрізає
+    assert any("Код NHANES" in t.value.columns for t in at.table)
+
+
+def test_correlation_tables_fit_page_width() -> None:
+    at = run(PAGES[2])
+    # 2.2 і 2.3 — статичні: усі дев'ять колонок видно без прокручування вбік
+    wide = [t.value for t in at.table if t.value.columns[0] == "Змінна"]
+    assert len(wide) == 2
+    assert all(len(w.columns) == 9 for w in wide)
+
+
 def test_risk_factors_page_has_tables() -> None:
     at = run(PAGES[3])
     assert len(at.dataframe) >= 1
